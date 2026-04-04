@@ -41,7 +41,7 @@ app:
     expiration: 86400000
 
   cors:
-    allowed-origins: http://localhost:5173,http://localhost:4173
+    allowed-origins: http://alminafrontend-invq.vercel.app
 
   security:
     debug-permit-all: false
