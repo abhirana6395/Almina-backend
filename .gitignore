@@ -1,0 +1,16 @@
+# env file
+.env
+
+# logs
+logs/
+*.log
+
+# target folder
+target/
+
+# node (agar frontend ho)
+node_modules/
+
+# IDE
+.vscode/
+.idea/
