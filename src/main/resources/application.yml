@@ -41,7 +41,7 @@ app:
     expiration: 86400000
 
   cors:
-    allowed-origins: http://alminafrontend-invq.vercel.app
+    allowed-origins: https://alminafrontend-invq.vercel.app
 
   security:
     debug-permit-all: false
