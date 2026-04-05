@@ -21,10 +21,10 @@ spring:
       write-dates-as-timestamps: false
 
   mail:
-    host: smtp.gmail.com
+    host: smtp.sendgrid.net
     port: 587
-    username: ${SPRING_MAIL_USERNAME}
-    password: ${SPRING_MAIL_PASSWORD}
+    username: apikey
+    password: ${SENDGRID_API_KEY}
     properties:
       mail:
         smtp:
