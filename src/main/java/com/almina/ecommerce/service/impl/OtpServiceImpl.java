@@ -12,13 +12,19 @@ import com.almina.ecommerce.repository.OtpRepository;
 import com.almina.ecommerce.repository.UserRepository;
 import com.almina.ecommerce.security.JwtService;
 import com.almina.ecommerce.service.OtpService;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,12 +33,14 @@ public class OtpServiceImpl implements OtpService {
 
     private final OtpRepository otpRepository;
     private final UserRepository userRepository;
-    private final JavaMailSender javaMailSender;
     private final JwtService jwtService;
     private final EntityMapper entityMapper;
 
-    @Value("${spring.mail.username}")
+    @Value("${app.otp.from-email}")
     private String fromEmail;
+
+    @Value("${SENDGRID_API_KEY}")
+    private String sendGridApiKey;
 
     @Value("${app.otp.expiry-minutes}")
     private long expiryMinutes;
@@ -115,11 +123,29 @@ public class OtpServiceImpl implements OtpService {
     }
 
     private void sendEmail(Otp otp) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(otp.getEmail());
-        message.setSubject(senderName + " verification code");
-        message.setText("Your ALMINA OTP is " + otp.getOtp() + ". It expires in " + expiryMinutes + " minutes.");
-        javaMailSender.send(message);
+        Email from = new Email(fromEmail, senderName);
+        Email to = new Email(otp.getEmail());
+        String subject = senderName + " verification code";
+        Content content = new Content(
+                "text/plain",
+                "Your ALMINA OTP is " + otp.getOtp() + ". It expires in " + expiryMinutes + " minutes.");
+        Mail mail = new Mail(from, subject, to, content);
+
+        SendGrid sendGrid = new SendGrid(sendGridApiKey);
+        Request request = new Request();
+
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+
+            Response response = sendGrid.api(request);
+            if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
+                throw new IllegalStateException("Failed to send OTP email via SendGrid. Status: "
+                        + response.getStatusCode());
+            }
+        } catch (IOException ex) {
+            throw new IllegalStateException("Failed to send OTP email via SendGrid", ex);
+        }
     }
 }
