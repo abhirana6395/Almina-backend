@@ -20,18 +20,6 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
-  mail:
-    host: smtp.sendgrid.net
-    port: 587
-    username: apikey
-    password: ${SENDGRID_API_KEY}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-
 server:
   port: 8080
 
@@ -49,6 +37,7 @@ app:
   otp:
     expiry-minutes: 5
     sender-name: ALMINA
+    from-email: ${APP_OTP_FROM_EMAIL}
 
   razorpay:
     key-id: ${RAZORPAY_KEY_ID}
